@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIQORA - Trade the Market. Wear the Pain.</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --black: #0a0a0a;
+            --black-secondary: #1a1a1a;
+            --gold-primary: #D4AF37;
+            --gold-glow: #FAD02C;
+            --neon-accent: #00FFFF;
+            --neon-red: #FF0040;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Exo 2', sans-serif;
+            background: var(--black);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Animated Background */
+        .chart-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.1;
+        }
+
+        .candlestick {
+            position: absolute;
+            background: linear-gradient(180deg, var(--gold-primary), var(--gold-glow));
+            border-radius: 2px;
+            animation: candleMove 20s linear infinite;
+        }
+
+        @keyframes candleMove {
+            0% { transform: translateX(-100px) translateY(0); }
+            100% { transform: translateX(calc(100vw + 100px)) translateY(0); }
+        }
+
+        /* Navigation */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 1rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 3rem;
+        }
+
+        .logo {
+            font-family: 'Orbitron', monospace;
+            font-size: 2rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, var(--gold-primary), var(--gold-glow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 3px;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 3rem;
+        }
+
+        .nav-links a {
+            color: var(--text-primary);
+            text-decoration: none;
+            font-weight: 600;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gold-primary);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .nav-links a:hover {
+            color: var(--gold-primary);
+        }
+
+        .cart-btn {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary);
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            position: relative;
+        }
+
+        .cart-btn:hover {
+            background: var(--gold-primary);
+            color: var(--black);
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.5);
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--neon-red);
+            color: white;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero-content h1 {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(4rem, 8vw, 8rem);
+            font-weight: 900;
+            background: linear-gradient(45deg, var(--gold-primary), var(--gold-glow), var(--neon-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1.5rem;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.5)); }
+            to { filter: drop-shadow(0 0 30px rgba(0, 255, 255, 0.3)); }
+        }
+
+        .hero-content p {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto 3rem;
+            font-weight: 300;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(45deg, var(--gold-primary), var(--gold-glow));
+            color: var(--black);
+            padding: 1.5rem 4rem;
+            font-size: 1.3rem;
+            font-weight: 800;
+            text-decoration: none;
+            border-radius: 50px;
+            font-family: 'Orbitron', monospace;
+            letter-spacing: 2px;
+            transition: all 0.4s ease;
+            box-shadow: 0 20px 40px rgba(212, 175, 55, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .cta-button:hover::before {
+            left: 100%;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 30px 60px rgba(212, 175, 55, 0.6);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 3rem;
+        }
+
+        /* Sections */
+        section {
+            padding: 8rem 0;
+        }
+
+        .section-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 3.5rem;
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 4rem;
+            background: linear-gradient(45deg, var(--gold-primary), var(--gold-glow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 2px;
+        }
+
+        /* Sticker Grid */
+        .stickers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .sticker-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2rem;
+            transition: all 0.4s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sticker-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--gold-primary), var(--neon-accent), var(--neon-red));
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
+        }
+
+        .sticker-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .sticker-card:hover {
+            transform: translateY(-20px) scale(1.02);
+            border-color: var(--gold-primary);
+            box-shadow: 
+                0 30px 60px rgba(0, 0, 0, 0.5),
+                0 0 40px rgba(212, 175, 55, 0.3);
+        }
+
+        .sticker-visual {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, var(--black-secondary), var(--black));
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            border: 2px solid var(--glass-border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sticker-visual i {
+            filter: drop-shadow(0 0 20px currentColor);
+            z-index: 2;
+        }
+
+        .sticker-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .sticker-desc {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+
+        .sticker-price {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--gold-primary);
+            margin-bottom: 1rem;
+        }
+
+        .add-cart-btn {
+            width: 100%;
+            background: linear-gradient(45deg, var(--gold-primary), var(--gold-glow));
+            color: var(--black);
+            border: none;
+            padding: 1rem;
+            border-radius: 12px;
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+        }
+
+        .add-cart-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.5);
+        }
+
+        /* Categories */
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .category-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 3rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            position: relative;
+        }
+
+        .category-card:hover {
+            transform: translateY(-15px);
+            border-color: var(--gold-primary);
+            box-shadow: 0 25px 50px rgba(212, 175, 55, 0.2);
+        }
+
+        .category-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(45deg, var(--gold-primary), var(--neon-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.5));
+        }
+
+        .category-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+
+        /* Cart Modal */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--black-secondary);
+            backdrop-filter: blur(30px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 3rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            background: var(--glass-bg);
+            border-radius: 16px;
+            margin-bottom: 1rem;
+            border: 1px solid var(--glass-border);
+        }
+
+        .cart-total {
+            font-family: 'Orbitron', monospace;
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--gold-primary);
+            text-align: right;
+            margin: 2rem 0;
+        }
+
+        .checkout-btn {
+            width: 100%;
+            background: linear-gradient(45deg, var(--neon-accent), var(--neon-red));
+            color: white;
+            border: none;
+            padding: 1.5rem;
+            border-radius: 16px;
+            font-family: 'Orbitron', monospace;
+            font-size: 1.2rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 2px;
+        }
+
+        .checkout-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 20px 40px rgba(0, 255, 255, 0.4);
+        }
+
+        /* Product Modal */
+        .product-modal .modal {
+            max-width: 1000px;
+        }
+
+        .product-preview {
+            width: 100%;
+            height: 400px;
+            background: linear-gradient(135deg, var(--black-secondary), var(--black));
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8rem;
+            border: 2px solid var(--glass-border);
+            margin-bottom: 2rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .nav-container {
+                padding: 0 2rem;
+            }
+            
+            .container {
+                padding: 0 2rem;
+            }
+            
+            .stickers-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .hero-content h1 {
+                font-size: 3rem;
+            }
+        }
+
+        /* Scroll animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate {
+            opacity: 0;
+            animation: fadeInUp 0.8s ease forwards;
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <canvas class="chart-bg" id="chartBg"></canvas>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">LIQORA</div>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#categories">Categories</a></li>
+                <li><a href="#stickers">Stickers</a></li>
+            </ul>
+            <button class="cart-btn" onclick="toggleCart()">
+                <i class="fas fa-cart-shopping"></i>
+                <span class="cart-count" id="cartCount">0</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h1>LIQORA</h1>
+            <p>Trade the Market. Wear the Pain.</p>
+            <p style="font-size: 1.3rem; margin-top: 1rem; color: var(--text-secondary);">Funny, brutal, and relatable stickers for real traders</p>
+            <a href="#stickers" class="cta-button">Explore Stickers</a>
+        </div>
+    </section>
+
+    <!-- Categories -->
+    <section id="categories" class="container">
+        <h2 class="section-title">Categories</h2>
+        <div class="categories-grid">
+            <div class="category-card" onclick="filterStickers('gold')">
+                <div class="category-icon">
+                    <i class="fas fa-coins"></i>
+                </div>
+                <h3 class="category-title">Gold (XAUUSD) Chaos</h3>
+                <p>Stickers for gold traders who know the pain</p>
+            </div>
+            <div class="category-card" onclick="filterStickers('forex')">
+                <div class="category-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3 class="category-title">Forex Pain</h3>
+                <p>Pairs that hunt your stops daily</p>
+            </div>
+            <div class="category-card" onclick="filterStickers('mindset')">
+                <div class="category-icon">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <h3 class="category-title">Trader Mindset</h3>
+                <p>The psychology of losing money</p>
+            </div>
+            <div class="category-card" onclick="filterStickers('liquidity')">
+                <div class="category-icon">
+                    <i class="fas fa-water"></i>
+                </div>
+                <h3 class="category-title">Liquidity Memes</h3>
+                <p>When the market takes you personally</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stickers -->
+    <section id="stickers" class="container">
+        <h2 class="section-title">Featured Stickers</h2>
+        <div class="stickers-grid" id="stickersGrid">
+            <!-- Stickers populated by JS -->
+        </div>
+    </section>
+
+    <!-- Cart Overlay -->
+    <div class="overlay" id="cartOverlay">
+        <div class="modal">
+            <h2 style="font-family: 'Orbitron', monospace; margin-bottom: 2rem;">
+                <i class="fas fa-cart-shopping"></i> Your Cart
+            </h2>
+            <div id="cartItems"></div>
+            <div class="cart-total" id="cartTotal">$0.00</div>
+            <button class="checkout-btn" onclick="checkout()">
+                <i class="fas fa-credit-card"></i> Checkout
+            </button>
+        </div>
+    </div>
+
+    <!-- Product Modal -->
+    <div class="overlay product-modal" id="productModal">
+        <div class="modal">
+            <div class="product-preview" id="productPreview">
+                <i class="fas fa-chart-line" id="largeIcon"></i>
+            </div>
+            <div>
+                <h2 id="modalTitle" style="font-family: 'Orbitron', monospace; font-size: 2.5rem; margin-bottom: 1rem;"></h2>
+                <p id="modalDesc" style="color: var(--text-secondary); margin-bottom: 2rem; font-size: 1.1rem;"></p>
+                <div id="modalPrice" style="font-size: 2rem; font-weight: 900; color: var(--gold-primary); margin-bottom: 2rem;"></div>
+                <button class="add-cart-btn" id="modalAddBtn" onclick="addToCartFromModal()">
+                    Add to Cart
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Premium Sticker Collection
+        const stickers = [
+            {
+                id: 1,
+                title: "Liquidity Took Me Personally",
+                price: 5.99,
+                category: 'liquidity',
+                icon: 'fas fa-water',
+                visual: '💧',
+                desc: "When stops get hunted and the market knows your exact position. We've all felt this betrayal.",
+                color: '#00FFFF'
+            },
+            {
+                id: 2,
+                title: "Sniper Entry, Still Dead",
+                price: 5.99,
+                category: 'forex',
+                icon: 'fas fa-crosshairs',
+                visual: '🎯',
+                desc: "3 hours of analysis for the perfect setup. 5 pips profit, 50 pips loss. Precision trading.",
+                color: '#FF6B35'
+            },
+            {
+                id: 3,
+                title: "Gold Said No",
+                price: 6.49,
+                category: 'gold',
+                icon: 'fas fa-coins',
+                visual: '🪙',
+                desc: "XAUUSD ignores every analyst, pumps your sell, dumps your buy. Gold gonna gold.",
+                color: '#D4AF37'
+            },
+            {
+                id: 4,
+                title: "RR 1:10 Dreamer",
+                price: 5.99,
+                category: 'mindset',
+                icon: 'fas fa-dream',
+                visual: '📊',
+                desc: "Risk:Reward ratios that exist only in backtests. Reality hits different.",
+                color: '#FFD700'
+            },
+            {
+                id: 5,
+                title: "Break Even King",
+                price: 5.99,
+                category: 'mindset',
+                icon: 'fas fa-balance-scale',
+                visual: '⚖️',
+                desc: "Moving stops to breakeven before price even moves. The ultimate trader flex.",
+                color: '#00FF88'
+            },
+            {
+                id: 6,
+                title: "FOMO Wrecked Me",
+                price: 5.99,
+                category: 'forex',
+                icon: 'fas fa-running',
+                visual: '🏃‍♂️',
+                desc: "Chasing the move you missed. Perfect entry? Nah, perfect reversal instead.",
+                color: '#FF4757'
+            },
+            {
+                id: 7,
+                title: "Prop Firm Funeral",
+                price: 5.99,
+                category: 'mindset',
+                icon: 'fas fa-coffin',
+                visual: '⚰️',
+                desc: "One red day from account deletion. Prop firm life: 5% drawdown = goodbye.",
+                color: '#2F3542'
+            },
+            {
+                id: 8,
+                title: "News Spike Slayer",
+                price: 5.99,
+                category: 'liquidity',
+                icon: 'fas fa-bolt',
+                visual: '⚡',
+                desc: "NFP, FOMC, CPI - the holy trinity of stop hunting. May your spreads be narrow.",
+                color: '#FF0080'
+            },
+            {
+                id: 9,
+                title: "Weekend Gap Goon",
+                price: 6.49,
+                category: 'gold',
+                icon: 'fas fa-clock',
+                visual: '🕐',
+                desc: "Monday morning gaps that erase weekend analysis. The market never sleeps.",
+                color: '#8E44AD'
+            },
+            {
+                id: 10,
+                title: "Revenge Trade Ritual",
+                price: 5.99,
+                category: 'mindset',
+                icon: 'fas fa-fire',
+                visual: '🔥',
+                desc: "One loss becomes five. Emotions > strategy. The cycle continues.",
+                color: '#E74C3C'
+            }
+        ];
+
+        let cart = [];
+        let currentFilter = 'all';
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            createChartBackground();
+            renderStickers();
+            updateCartCount();
+            observeScrollAnimations();
+        });
+
+        // Chart Background Animation
+        function createChartBackground() {
+            const canvas = document.getElementById('chartBg');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            function createCandle() {
+                const candle = document.createElement('div');
+                candle.className = 'candlestick';
+                candle.style.left = '-100px';
+                candle.style.width = Math.random() * 4 + 1 + 'px';
+                candle.style.height = (Math.random() * 100 + 20) + 'px';
+                candle.style.top = (Math.random() * (window.innerHeight - 100)) + 'px';
+                candle.style.animationDuration = (Math.random() * 10 + 15) + 's';
+                candle.style.animationDelay = Math.random() * 5 + 's';
+                document.body.appendChild(candle);
+
+                setTimeout(() => candle.remove(), 25000);
+            }
+
+            setInterval(createCandle, 800);
+        }
+
+        // Render Stickers
+        function renderStickers(filtered = stickers) {
+            const grid = document.getElementById('stickersGrid');
+            grid.innerHTML = filtered.map(sticker => `
+                <div class="sticker-card animate" onclick="openProductModal(${sticker.id})" style="animation-delay: ${Math.random() * 0.3}s">
+                    <div class="sticker-visual" style="border-color: ${sticker.color}33; background: linear-gradient(135deg, ${sticker.color}15, var(--black-secondary))">
+                        <i class="${sticker.icon}" style="color: ${sticker.color}"></i>
+                    </div>
+                    <div class="sticker-title">${sticker.title}</div>
+                    <div class="sticker-desc">${sticker.desc}</div>
+                    <div class="sticker-price">$${sticker.price.toFixed(2)}</div>
+                    <button class="add-cart-btn" onclick="event.stopPropagation(); addToCart(${sticker.id})">
+                        <i class="fas fa-cart-plus"></i> Add to Cart
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Filter
+        function filterStickers(category) {
+            currentFilter = category;
+            const filtered = category === 'all' ? stickers : stickers.filter(s => s.category === category);
+            renderStickers(filtered);
+        }
+
+        // Cart Functions
+        function addToCart(id) {
+            const sticker = stickers.find(s => s.id === id);
+            const cartItem = cart.find(item => item.id === id);
+            
+            if (cartItem) {
+                cartItem.quantity += 1;
+            } else {
+                cart.push({ ...sticker, quantity: 1 });
+            }
+            
+            updateCartCount();
+            showNotification('Added to cart! 🔥');
+        }
+
+        function updateCartCount() {
+            const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+            document.getElementById('cartCount').textContent = count;
+        }
+
+        function toggleCart() {
+            document.getElementById('cartOverlay').classList.toggle('active');
+            if (document.getElementById('cartOverlay').classList.contains('active')) {
+                renderCart();
+            }
+        }
+
+        function renderCart() {
+            const items = document.getElementById('cartItems');
+            const totalEl = document.getElementById('cartTotal');
+            
+            if (cart.length === 0) {
+                items.innerHTML = '<div style="text-align: center; padding: 3rem; color: var(--text-secondary);">Your cart is empty<br><small>Add some pain to your collection</small></div>';
+                totalEl.textContent = '$0.00';
+                return;
+            }
+            
+            items.innerHTML = cart.map(item => `
+                <div class="cart-item">
+                    <div>
+                        <div style="font-weight: 700; margin-bottom: 0.5rem;">${item.title}</div>
+                        <div>$${item.price.toFixed(2)} × ${item.quantity}</div>
+                    </div>
+                    <button onclick="removeFromCart(${item.id})" style="background: var(--neon-red); color: white; border: none; padding: 0.7rem 1.2rem; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                        Remove
+                    </button>
+                </div>
+            `).join('');
+            
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            totalEl.textContent = `$${total.toFixed(2)}`;
+        }
+
+        function removeFromCart(id) {
+            cart = cart.filter(item => item.id !== id);
+            renderCart();
+            updateCartCount();
+        }
+
+        function checkout() {
+            if (cart.length === 0) return;
+            alert(`Order confirmed! Total: $${cart.reduce((sum, item) => sum + (item.price * item.quantity), 0).toFixed(2)}\nThanks for supporting LIQORA 💀📈`);
+            cart = [];
+            toggleCart();
+            updateCartCount();
+        }
+
+        // Product Modal
+        function openProductModal(id) {
+            const sticker = stickers.find(s => s.id === id);
+            document.getElementById('productModal').dataset.productId = id;
+            document.getElementById('modalTitle').textContent = sticker.title;
+            document.getElementById('modalDesc').textContent = sticker.desc;
+            document.getElementById('modalPrice').textContent = `$${sticker.price.toFixed(2)}`;
+            document.getElementById('productPreview').style.borderColor = sticker.color + '66';
+            document.getElementById('productPreview').style.background = `linear-gradient(135deg, ${sticker.color}20, var(--black-secondary))`;
+            document.getElementById('largeIcon').className = sticker.icon;
+            document.getElementById('largeIcon').style.color = sticker.color;
+            document.getElementById('modalAddBtn').textContent = 'Add to Cart';
+            
+            document.getElementById('productModal').classList.add('active');
+        }
+
+        function addToCartFromModal() {
+            const id = parseInt(document.getElementById('productModal').dataset.productId);
+            addToCart(id);
+            document.getElementById('modalAddBtn').textContent = 'Added! 🎯';
+            setTimeout(() => {
+                document.getElementById('modalAddBtn').textContent = 'Add to Cart';
+            }, 1500);
+        }
+
+        // Notifications
+        function showNotification(msg) {
+            const notif = document.createElement('div');
+            notif.style.cssText = `
+                position: fixed;
+                top: 120px;
+                right: 30px;
+                background: linear-gradient(45deg, var(--gold-primary), var(--neon-accent));
+                color: var(--black);
+                padding: 1.2rem 2.5rem;
+                border-radius: 16px;
+                font-family: 'Orbitron', monospace;
+                font-weight: 700;
+                z-index: 3000;
+                box-shadow: 0 20px 40px rgba(212, 175, 55, 0.4);
+                animation: slideIn 0.4s ease;
+            `;
+            notif.textContent = msg;
+            document.body.appendChild(notif);
+            
+            setTimeout(() => notif.remove(), 3000);
+        }
+
+        // Event Listeners
+        document.querySelectorAll('.overlay').forEach(overlay => {
+            overlay.addEventListener('click', function(e) {
+                if (e.target === this) this.classList.remove('active');
+            });
+        });
+
+        document.querySelectorAll('a[href^="#"]').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+
+        // Scroll Animations
+        function observeScrollAnimations() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.animationPlayState = 'running';
+                    }
+                });
+            });
+            
+            document.querySelectorAll('.sticker-card, .category-card').forEach(el => {
+                observer.observe(el);
+            });
+        }
+
+        // Resize canvas
+        window.addEventListener('resize', () => {
+            const canvas = document.getElementById('chartBg');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>
